@@ -9,6 +9,7 @@ git --no-pager log --name-status --no-merges --all \
 """
 import re
 import csv
+import os
 
 COMMIT_ID = 'commit '
 STATUS_ADD = 'A	'
@@ -54,7 +55,11 @@ for item in data:
 print(array_commit_info)
 
 # CSV形式で出力.
-output_filename = './output/git_output.csv'
+file_path = './output/'
+if not os.path.exists(file_path):
+    os.mkdir(file_path)
+
+output_filename = file_path + 'git_output.csv'
 with open(output_filename, 'w') as f:
     writer = csv.writer(f)
 
