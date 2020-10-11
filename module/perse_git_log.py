@@ -17,7 +17,7 @@ STATUS_DEL = 'D	'
 GIT_AUTHOR = 'Author: '
 GIT_DATE = 'Date:   '
 
-path = './git.log'
+path = './input/git.log'
 
 # gitのlogファイルを読み込む.
 array_commit_info = []
@@ -54,7 +54,7 @@ for item in data:
 print(array_commit_info)
 
 # CSV形式で出力.
-output_filename = './git_output.csv'
+output_filename = './output/git_output.csv'
 with open(output_filename, 'w') as f:
     writer = csv.writer(f)
 
