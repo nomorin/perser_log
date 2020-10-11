@@ -16,8 +16,8 @@ ini_file = configparser.ConfigParser()
 ini_file.read('./config/settings.ini', 'UTF-8')
 
 # 環境ファイルの読み込み設定.
-# env = 'DEFAULT'
-env = 'JP'
+env = 'DEFAULT'
+# env = 'JP'
 
 COMMIT_ID = ini_file.get(env, 'COMMIT_ID')
 STATUS_ADD = ini_file.get(env, 'STATUS_ADD')
