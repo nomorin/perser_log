@@ -15,22 +15,14 @@ import configparser
 ini_file = configparser.ConfigParser()
 ini_file.read('./config/settings.ini', 'UTF-8')
 
-# 環境ファイルの読み込み設定.
-env = 'DEFAULT'
-# env = 'JP'
+COMMIT_ID = 'commit '
+STATUS_ADD = 'A	'
+STATUS_MOD = 'M	'
+STATUS_DEL = 'D	'
+GIT_AUTHOR = 'Author: '
+GIT_DATE = 'Date:   '
 
-COMMIT_ID = ini_file.get(env, 'COMMIT_ID')
-STATUS_ADD = ini_file.get(env, 'STATUS_ADD')
-STATUS_MOD = ini_file.get(env, 'STATUS_MOD')
-STATUS_DEL = ini_file.get(env, 'STATUS_DEL')
-GIT_AUTHOR = ini_file.get(env, 'GIT_AUTHOR')
-GIT_DATE = ini_file.get(env, 'GIT_DATE')
-
-# 処理対象のログファイルのパス.
-if env == 'DEFAULT':
-    path = './input/git.log'
-else:
-    path = './input/git_log_jp.log'
+path = './input/git.log'
 
 # gitのlogファイルを読み込む.
 array_commit_info = []
@@ -43,8 +35,7 @@ for item in data:
 
     if COMMIT_ID in item:
         # コミットのハッシュIDを取得.
-        # commit_id = item.replace(COMMIT_ID, '')
-        commit_id = re.sub('.*: ', '', item)
+        commit_id = item.replace(COMMIT_ID, '')
 
     elif GIT_AUTHOR in item:
         # コミットしたユーザー情報を取得.
@@ -54,25 +45,24 @@ for item in data:
 
     elif GIT_DATE in item:
         # コミット日時を取得.
-        # date = item.replace(GIT_DATE, '')
-        date = re.sub('.*: ', '', item)
+        date = item.replace(GIT_DATE, '')
 
     else:
         # ファイルの変更履歴を取得.
-        if STATUS_ADD in item or STATUS_MOD in item or STATUS_DEL in item:
+        file_status = item[0:2]
+        if file_status == STATUS_ADD or file_status == STATUS_MOD or file_status == STATUS_DEL:
             # Gitのステータスを除いたファイル名の取得.
-            file_name = re.sub('.*: ', '', item)
+            file_name = item[2:]
             # 出力用の配列に情報を保持.
             array_commit_info.append([commit_id, author, date, file_name])
 
 print(array_commit_info)
 
-# 出力先が存在しない場合は作成する.
+# CSV形式で出力.
 file_path = './output/'
 if not os.path.exists(file_path):
     os.mkdir(file_path)
 
-# CSV形式で出力.
 output_filename = file_path + 'git_output.csv'
 with open(output_filename, 'w') as f:
     writer = csv.writer(f)
