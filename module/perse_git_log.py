@@ -25,9 +25,13 @@ array_commit_info = []
 with open(path, encoding='CP932') as git_log_file:
     data = git_log_file.readlines()
 
+comment = ''
 for item in data:
     # 末尾の改行コードを削除.
     item = item.replace('\n', '')
+
+    # ファイルの変更履歴を取得.
+    file_status = item[0:2]
 
     if COMMIT_ID in item:
         # コミットのハッシュIDを取得.
@@ -42,15 +46,22 @@ for item in data:
     elif GIT_DATE in item:
         # コミット日時を取得.
         date = item.replace(GIT_DATE, '')
+        comment_area = True
 
-    else:
-        # ファイルの変更履歴を取得.
-        file_status = item[0:2]
-        if file_status == STATUS_ADD or file_status == STATUS_MOD or file_status == STATUS_DEL:
-            # Gitのステータスを除いたファイル名の取得.
-            file_name = item[2:]
-            # 出力用の配列に情報を保持.
-            array_commit_info.append([commit_id, author, date, file_name])
+    elif file_status == STATUS_ADD or file_status == STATUS_MOD or file_status == STATUS_DEL:
+        # Gitのステータスを除いたファイル名の取得.
+        file_name = item[2:]
+        # 出力用の配列に情報を保持.
+        array_commit_info.append([commit_id, author, date, file_name, comment])
+
+        # コメント情報をクリア.
+        comment_area = False
+        comment = ''
+
+    elif comment_area:
+        # コメントを取得.
+        comment += re.sub(' *', '', item)
+
 
 # フォルダが存在しない場合は作成する.
 file_path = './output/'
@@ -63,8 +74,9 @@ with open(output_filename, 'w') as f:
     writer = csv.writer(f)
 
     # ヘッダ情報を出力.
-    writer.writerow(['COMMIT_ID', 'AUTHOR', 'DATE', 'COMMIT_FILE_NAME'])
+    writer.writerow(['COMMIT_ID', 'AUTHOR', 'DATE', 'COMMIT_FILE_NAME', 'Comment'])
+
+    # コミット情報を出力.
     for line_data in array_commit_info:
-        # コミット情報を出力.
         writer.writerow(line_data)
 
