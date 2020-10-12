@@ -10,10 +10,6 @@ git --no-pager log --name-status --no-merges --all \
 import re
 import csv
 import os
-import configparser
-
-ini_file = configparser.ConfigParser()
-ini_file.read('./config/settings.ini', 'UTF-8')
 
 COMMIT_ID = 'commit '
 STATUS_ADD = 'A	'
@@ -22,11 +18,11 @@ STATUS_DEL = 'D	'
 GIT_AUTHOR = 'Author: '
 GIT_DATE = 'Date:   '
 
-path = './input/git.log'
+path = './input/test.log'
 
 # gitのlogファイルを読み込む.
 array_commit_info = []
-with open(path) as git_log_file:
+with open(path, encoding='CP932') as git_log_file:
     data = git_log_file.readlines()
 
 for item in data:
@@ -56,13 +52,12 @@ for item in data:
             # 出力用の配列に情報を保持.
             array_commit_info.append([commit_id, author, date, file_name])
 
-print(array_commit_info)
-
-# CSV形式で出力.
+# フォルダが存在しない場合は作成する.
 file_path = './output/'
 if not os.path.exists(file_path):
     os.mkdir(file_path)
 
+# CSV形式で出力.
 output_filename = file_path + 'git_output.csv'
 with open(output_filename, 'w') as f:
     writer = csv.writer(f)
