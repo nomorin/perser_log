@@ -11,12 +11,12 @@ import re
 import csv
 import os
 
-COMMIT_ID = 'commit '
-STATUS_ADD = 'A	'
-STATUS_MOD = 'M	'
-STATUS_DEL = 'D	'
-GIT_AUTHOR = 'Author: '
-GIT_DATE = 'Date:   '
+COMMIT_ID = 'commit'
+STATUS_ADD = 'A'
+STATUS_MOD = 'M'
+STATUS_DEL = 'D'
+GIT_AUTHOR = 'Author:'
+GIT_DATE = 'Date:'
 
 input_file_path = './input/test.log'
 output_path = './output/'
@@ -45,6 +45,9 @@ def parse_git_log(input_csv_data):
     ログファイルを読み込み、整形する.
     :return: ログファイルを整形した配列.
     """
+    key = 0
+    value = 1
+
     # gitのlogファイルを読み込む.
     array_commit_info = []
 
@@ -53,27 +56,35 @@ def parse_git_log(input_csv_data):
         # 末尾の改行コードを削除.
         item = item.replace('\n', '')
 
+        if not item:
+            continue
+
         # ファイルの変更履歴を取得.
-        file_status = item[0:2]
+        if not item.split():
+            continue
+
+        file_status = item.split()[key]
 
         if COMMIT_ID in item:
             # コミットのハッシュIDを取得.
-            commit_id = item.replace(COMMIT_ID, '')
+            commit_id = item.split()[value]
 
         elif GIT_AUTHOR in item:
             # コミットしたユーザー情報を取得.
-            author_tmp = item.replace(GIT_AUTHOR, '')
+            author_tmp = item.split()[value]
             # メールアドレス部分を削除.
             author = re.sub(' +<.*>', '', author_tmp)
 
         elif GIT_DATE in item:
             # コミット日時を取得.
-            date = item.replace(GIT_DATE, '')
+            date = item.split()[value]
             comment_area = True
 
-        elif file_status == STATUS_ADD or file_status == STATUS_MOD or file_status == STATUS_DEL:
+        elif file_status == STATUS_ADD \
+                or file_status == STATUS_MOD \
+                or file_status == STATUS_DEL:
             # Gitのステータスを除いたファイル名の取得.
-            file_name = item[2:]
+            file_name = item.split()[value]
             # 出力用の配列に情報を保持.
             array_commit_info.append([commit_id, author, date, file_name, comment])
 
@@ -83,7 +94,7 @@ def parse_git_log(input_csv_data):
 
         elif comment_area:
             # コメントを取得.
-            comment += re.sub(' *', '', item)
+            comment += item.strip()
 
     return array_commit_info
 
